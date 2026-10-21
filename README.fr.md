@@ -52,7 +52,6 @@ Lorsqu'un pion atteint la dernière rangée, un menu apparaît à gauche de l'é
 
 - Jeu à deux joueurs en local uniquement : il n'y a ni adversaire informatique, ni annulation de coup, ni pendule.
 - Seul le pat est détecté comme partie nulle. La triple répétition, la règle des cinquante coups et le matériel insuffisant ne sont pas gérés.
-- Le suivi des droits de roque est incomplet : déplacer une tour ne fait pas perdre le droit de roquer, si bien que le roque peut être autorisé ou refusé à tort dans certaines positions.
 - Il n'y a pas d'option pour recommencer : relancez le script pour démarrer une nouvelle partie.
 
 ## Structure du projet

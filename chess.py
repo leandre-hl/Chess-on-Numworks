@@ -281,11 +281,12 @@ def gen_pawn_moves(sqr_idx, c_board, last_move):
                     moves.append(sqr_idx + 9 * mult)
     return moves
 
-def can_king_go(color_,c_board,from_,to_):
-    if abs(from_-to_)==2:
-        return not is_king_in_check(color_,c_board)
-    c_board[from_],c_board[to_] = c_board[to_], c_board[from_]
-    return not is_king_in_check(color_, c_board[:])
+def can_king_go(color_, c_board, from_, to_):
+    if is_king_in_check(color_, c_board):
+        return False
+    c_board[from_], c_board[to_] = c_board[to_], c_board[from_]
+    return not is_king_in_check(color_, c_board)
+
 def gen_king_moves(sqr_idx, c_board, wq_castle, wk_castle, bq_castle, bk_castle):
     moves = []
     col, row = getCol(sqr_idx), getRow(sqr_idx)
@@ -296,11 +297,13 @@ def gen_king_moves(sqr_idx, c_board, wq_castle, wk_castle, bq_castle, bk_castle)
             if canAttack(sqr_idx, getSqrIdx(offset[0], offset[1]), c_board):
                 moves.append(getSqrIdx(offset[0], offset[1]))
     if getPieceColor(sqr_idx, c_board) == "W":
-        if wk_castle and isEmpty(5, c_board) and isEmpty(6, c_board) and can_king_go("W",c_board[:],sqr_idx,5): moves.append(6)
-        if wq_castle and isEmpty(3, c_board) and isEmpty(2, c_board) and can_king_go("W",c_board[:],sqr_idx,3): moves.append(2)
+        if sqr_idx == 4:
+            if wk_castle and isEmpty(5, c_board) and isEmpty(6, c_board) and can_king_go("W", c_board[:], 4, 5): moves.append(6)
+            if wq_castle and isEmpty(3, c_board) and isEmpty(2, c_board) and isEmpty(1, c_board) and can_king_go("W", c_board[:], 4, 3): moves.append(2)
     else:
-        if bk_castle and isEmpty(61, c_board) and isEmpty(62, c_board) and can_king_go("B",c_board[:],sqr_idx,61): moves.append(62)
-        if bq_castle and isEmpty(59, c_board) and isEmpty(58, c_board) and can_king_go("B",c_board[:],sqr_idx,59): moves.append(58)
+        if sqr_idx == 60:
+            if bk_castle and isEmpty(61, c_board) and isEmpty(62, c_board) and can_king_go("B", c_board[:], 60, 61): moves.append(62)
+            if bq_castle and isEmpty(59, c_board) and isEmpty(58, c_board) and isEmpty(57, c_board) and can_king_go("B", c_board[:], 60, 59): moves.append(58)
     return moves
 
 
@@ -369,6 +372,12 @@ def play_move(c_board, selected, cursor_c, cursor_r, angle,
 
     from_ = c_board[selected]
     to = c_board[getSqrIdx(cursor_c, cursor_r)]
+
+    if graphic:
+        for sq, i in ((0, 0), (7, 1), (56, 2), (63, 3)):
+            if selected == sq or getSqrIdx(cursor_c, cursor_r) == sq:
+                castles[i] = 0
+                
     #PROMOTION
     trans = from_
     if len(from_)==2 and from_[1]=="P" and cursor_r==(7*(from_[0]=="W")) and graphic :
@@ -386,9 +395,12 @@ def play_move(c_board, selected, cursor_c, cursor_r, angle,
     # ROQUE
     if len(from_) == 2 and from_[1] == "K":
         if graphic:
-            castles[0 + 2 * (from_[0] == "W")], castles[1 + 2 * (from_[0] == "W")] = 0, 0
+            base = 0 if from_[0] == "W" else 2
+            castles[base] = 0
+            castles[base + 1] = 0
         if abs(cursor_c - getCol(selected)) >= 2:
-            from_rook_pos = ((3 - abs(cursor_c - getCol(selected))) * 7, getRow(selected))
+            rook_col = 7 if cursor_c > getCol(selected) else 0
+            from_rook_pos = (rook_col, getRow(selected))
             to_rook_pos = (int((getCol(selected) + cursor_c) / 2), cursor_r)
             rook_type = "W" * (cursor_r == 0) + "B" * (cursor_r == 7) + "R"
             if graphic:
@@ -465,7 +477,7 @@ def find_possible_moves(c_board):
         elif piece == "Q":
             cu = gen_queen_moves(idx, c_board)
         elif piece == "K":
-            cu = gen_king_moves(idx, c_board, castles[0], castles[0], castles[0], castles[0])
+            cu = gen_king_moves(idx, c_board, castles[0], castles[1], castles[2], castles[3])
         moves.append(
             [i for i in cu if not (is_king_in_check(color_, play_move(c_board[:], idx, getCol(i), getRow(i), 0, False)))])
     return moves

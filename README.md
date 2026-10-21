@@ -52,7 +52,6 @@ When the game ends, the screen shows either `WHITE WON` / `BLACK WON` by checkma
 
 - Local two-player only: there is no computer opponent, undo, or clock.
 - Only stalemate is detected as a draw. Threefold repetition, the fifty-move rule and insufficient material are not handled.
-- The tracking of castling rights is incomplete: moving a rook does not revoke the right to castle, so castling can be allowed or refused wrongly in some positions.
 - There is no restart option: run the script again to start a new game.
 
 ## Project structure
